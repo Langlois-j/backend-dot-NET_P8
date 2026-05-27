@@ -1,5 +1,7 @@
 ﻿using GpsUtil.Location;
+using System.Collections.Concurrent;
 using TripPricer;
+            
 
 namespace TourGuide.Users;
 
@@ -10,8 +12,13 @@ public class User
     public string PhoneNumber { get; set; }
     public string EmailAddress { get; set; }
     public DateTime LatestLocationTimestamp { get; set; }
-    public List<VisitedLocation> VisitedLocations { get; } = new List<VisitedLocation>();
-    public List<UserReward> UserRewards { get; } = new List<UserReward>();
+
+    private readonly ConcurrentBag<VisitedLocation> _visitedLocations = new();
+    public IReadOnlyCollection<VisitedLocation> VisitedLocations => _visitedLocations;
+
+    private readonly ConcurrentBag<UserReward> _userRewards = new();
+    public IReadOnlyCollection<UserReward> UserRewards => _userRewards;
+
     public UserPreferences UserPreferences { get; set; } = new UserPreferences();
     public List<Provider> TripDeals { get; set; } = new List<Provider>();
 
@@ -25,24 +32,24 @@ public class User
 
     public void AddToVisitedLocations(VisitedLocation visitedLocation)
     {
-        VisitedLocations.Add(visitedLocation);
+        _visitedLocations.Add(visitedLocation);
     }
 
     public void ClearVisitedLocations()
     {
-        VisitedLocations.Clear();
+        _visitedLocations.Clear();
     }
 
     public void AddUserReward(UserReward userReward)
     {
-        if (!UserRewards.Exists(r => r.Attraction.AttractionName == userReward.Attraction.AttractionName))
+        if (!_userRewards.Any(r => r.Attraction.AttractionName == userReward.Attraction.AttractionName))
         {
-            UserRewards.Add(userReward);
+            _userRewards.Add(userReward);
         }
     }
 
     public VisitedLocation GetLastVisitedLocation()
     {
-        return VisitedLocations[^1];
+        return _visitedLocations.Last();
     }
 }

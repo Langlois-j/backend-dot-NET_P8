@@ -46,7 +46,7 @@ public class TourGuideService : ITourGuideService
 
     public List<UserReward> GetUserRewards(User user)
     {
-        return user.UserRewards;
+        return user.UserRewards.ToList();
     }
 
     public VisitedLocation GetUserLocation(User user)
@@ -54,9 +54,11 @@ public class TourGuideService : ITourGuideService
         return user.VisitedLocations.Any() ? user.GetLastVisitedLocation() : TrackUserLocation(user);
     }
 
-    public User GetUser(string userName)
+    public User? GetUser(string userName)
     {
-        return _internalUserMap.ContainsKey(userName) ? _internalUserMap[userName] : null;
+        //return _internalUserMap.ContainsKey(userName) ? _internalUserMap[userName] : null;
+        _internalUserMap.TryGetValue(userName, out User? user);
+        return user;
     }
 
     public List<User> GetAllUsers()
