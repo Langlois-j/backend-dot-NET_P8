@@ -151,6 +151,6 @@ public class TourGuideService : ITourGuideService
 
     private DateTime GetRandomTime()
     {
-        return DateTime.UtcNow.AddDays(-new Random().Next(30));
+        return DateTime.UtcNow.AddDays(-Random.Shared.Next(30));
     }
 }

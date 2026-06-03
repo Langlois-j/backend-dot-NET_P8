@@ -21,6 +21,22 @@ public class RewardsService : IRewardsService
         _rewardsCentral =rewardCentral;
         _proximityBuffer = _defaultProximityBuffer;
     }
+
+    public void SetProximityBuffer(int proximityBuffer)
+    {
+        _proximityBuffer = proximityBuffer;
+    }
+
+    public void SetDefaultProximityBuffer()
+    {
+        _proximityBuffer = _defaultProximityBuffer;
+    }
+
+    public void CalculateRewards(User user)
+    {
+        CalculateRewards(user, _gpsUtil.GetAttractions());
+    }
+
     public void CalculateRewards(User user, List<Attraction> attractions)
     {
         foreach (var visitedLocation in user.VisitedLocations)
@@ -38,39 +54,6 @@ public class RewardsService : IRewardsService
             }
         }
     }
-
-    public void SetProximityBuffer(int proximityBuffer)
-    {
-        _proximityBuffer = proximityBuffer;
-    }
-
-    public void SetDefaultProximityBuffer()
-    {
-        _proximityBuffer = _defaultProximityBuffer;
-    }
-
-    public void CalculateRewards(User user)
-    {
-        count++;
-        IReadOnlyCollection<VisitedLocation> userLocations = user.VisitedLocations;
-        List<Attraction> attractions = _gpsUtil.GetAttractions();
-
-        foreach (var visitedLocation in userLocations)
-        {
-            foreach (var attraction in attractions)
-            {
-                if (NearAttraction(visitedLocation, attraction))
-                {
-                    user.AddUserReward(new UserReward(
-                        visitedLocation,
-                        attraction,
-                        GetRewardPoints(attraction, user)
-                    ));
-                }
-            }
-        }
-    }
-
     public bool IsWithinAttractionProximity(Attraction attraction, Locations location)
     {
        // Console.WriteLine(GetDistance(attraction, location));
