@@ -14,6 +14,7 @@ public class User
     public DateTime LatestLocationTimestamp { get; set; }
 
     private readonly ConcurrentBag<VisitedLocation> _visitedLocations = new();
+    private readonly HashSet<Guid> _rewardedAttractionIds = new();
     public IReadOnlyCollection<VisitedLocation> VisitedLocations => _visitedLocations;
 
     private readonly ConcurrentBag<UserReward> _userRewards = new();
@@ -42,7 +43,7 @@ public class User
 
     public void AddUserReward(UserReward userReward)
     {
-        if (!_userRewards.Any(r => r.Attraction.AttractionName == userReward.Attraction.AttractionName))
+        if (_rewardedAttractionIds.Add(userReward.Attraction.AttractionId))
         {
             _userRewards.Add(userReward);
         }

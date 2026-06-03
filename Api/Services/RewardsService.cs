@@ -21,6 +21,23 @@ public class RewardsService : IRewardsService
         _rewardsCentral =rewardCentral;
         _proximityBuffer = _defaultProximityBuffer;
     }
+    public void CalculateRewards(User user, List<Attraction> attractions)
+    {
+        foreach (var visitedLocation in user.VisitedLocations)
+        {
+            foreach (var attraction in attractions)
+            {
+                if (NearAttraction(visitedLocation, attraction))
+                {
+                    user.AddUserReward(new UserReward(
+                        visitedLocation,
+                        attraction,
+                        GetRewardPoints(attraction, user)
+                    ));
+                }
+            }
+        }
+    }
 
     public void SetProximityBuffer(int proximityBuffer)
     {
@@ -56,7 +73,7 @@ public class RewardsService : IRewardsService
 
     public bool IsWithinAttractionProximity(Attraction attraction, Locations location)
     {
-        Console.WriteLine(GetDistance(attraction, location));
+       // Console.WriteLine(GetDistance(attraction, location));
         return GetDistance(attraction, location) <= _attractionProximityRange;
     }
 
