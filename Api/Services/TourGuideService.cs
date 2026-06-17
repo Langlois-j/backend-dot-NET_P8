@@ -29,7 +29,7 @@ public class TourGuideService : ITourGuideService
         _tripPricer = new();
         _gpsUtil = gpsUtil;
         _rewardsService = rewardsService;
-        _cachedAttractions = _gpsUtil.GetAttractions();
+        _cachedAttractions =  _gpsUtil.GetAttractions();
 
         CultureInfo.CurrentCulture = new CultureInfo("en-US");
 
@@ -54,7 +54,7 @@ public class TourGuideService : ITourGuideService
 
     public async Task <VisitedLocation> GetUserLocation(User user)
     {
-        return await user.VisitedLocations.Any() ? user.GetLastVisitedLocation() : TrackUserLocation(user);
+        return  user.VisitedLocations.Any() ? user.GetLastVisitedLocation() : await TrackUserLocation(user);
     }
 
     public User? GetUser(string userName)
