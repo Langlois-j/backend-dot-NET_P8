@@ -1,4 +1,5 @@
 ﻿using GpsUtil.Location;
+using System.Collections.Concurrent;
 using TourGuide.LibrairiesWrappers.Interfaces;
 using TourGuide.Services.Interfaces;
 using TourGuide.Users;
@@ -14,6 +15,9 @@ public class RewardsService : IRewardsService
     private readonly IGpsUtil _gpsUtil;
     private readonly IRewardCentral _rewardsCentral;
     private static int count = 0;
+    //cache pour optimisation calcul
+    private readonly ConcurrentDictionary<(double lat1, double lon1, double lat2, double lon2), double> _distanceCache
+    = new();
 
     public RewardsService(IGpsUtil gpsUtil, IRewardCentral rewardCentral)
     {
@@ -72,6 +76,13 @@ public class RewardsService : IRewardsService
 
     public double GetDistance(Locations loc1, Locations loc2)
     {
+        //Controle si présent dasn le cache
+        var key = (loc1.Latitude, loc1.Longitude, loc2.Latitude, loc2.Longitude);
+        if (_distanceCache.TryGetValue(key, out double cachedDistance))
+        {
+            return cachedDistance;
+        }
+        //Mise encache
         double lat1 = Math.PI * loc1.Latitude / 180.0;
         double lon1 = Math.PI * loc1.Longitude / 180.0;
         double lat2 = Math.PI * loc2.Latitude / 180.0;
@@ -81,6 +92,9 @@ public class RewardsService : IRewardsService
                                 + Math.Cos(lat1) * Math.Cos(lat2) * Math.Cos(lon1 - lon2));
 
         double nauticalMiles = 60.0 * angle * 180.0 / Math.PI;
-        return StatuteMilesPerNauticalMile * nauticalMiles;
+        //sauvegarde en  cache
+        double distance = StatuteMilesPerNauticalMile * nauticalMiles;
+        _distanceCache.TryAdd(key, distance);
+        return distance;
     }
 }
