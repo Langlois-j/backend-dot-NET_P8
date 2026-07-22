@@ -15,6 +15,7 @@ public class User
 
     private readonly ConcurrentBag<VisitedLocation> _visitedLocations = new();
     private readonly HashSet<Guid> _rewardedAttractionIds = new();
+    private readonly object _rewardLock = new();
     public IReadOnlyCollection<VisitedLocation> VisitedLocations => _visitedLocations;
 
     private readonly ConcurrentBag<UserReward> _userRewards = new();
@@ -30,7 +31,7 @@ public class User
         PhoneNumber = phoneNumber;
         EmailAddress = emailAddress;
     }
-
+  
     public void AddToVisitedLocations(VisitedLocation visitedLocation)
     {
         _visitedLocations.Add(visitedLocation);
@@ -40,12 +41,15 @@ public class User
     {
         _visitedLocations.Clear();
     }
-
+    
     public void AddUserReward(UserReward userReward)
     {
-        if (_rewardedAttractionIds.Add(userReward.Attraction.AttractionId))
+        lock (_rewardLock)
         {
-            _userRewards.Add(userReward);
+            if (_rewardedAttractionIds.Add(userReward.Attraction.AttractionId))
+            {
+                _userRewards.Add(userReward);
+            }
         }
     }
 
