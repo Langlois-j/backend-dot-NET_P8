@@ -49,17 +49,18 @@ namespace TourGuideTest
         public async Task HighVolumeTrackLocation()
         {
             //On peut ici augmenter le nombre d'utilisateurs pour tester les performances
-            _fixture.Initialize(100);
+            _fixture.Initialize(100000);
 
             List<User> allUsers = _fixture.TourGuideService.GetAllUsers();
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            foreach (var user in allUsers)
-            {
-              await  _fixture.TourGuideService.TrackUserLocation(user);
-            }
+            //foreach (var user in allUsers)
+            // {
+            // await  _fixture.TourGuideService.TrackUserLocation(user);
+            // }
+            await Task.WhenAll(allUsers.Select(u => _fixture.TourGuideService.TrackUserLocation(u)));
             stopWatch.Stop();
             _fixture.TourGuideService.Tracker.StopTracking();
 
@@ -73,7 +74,7 @@ namespace TourGuideTest
         public async Task HighVolumeGetRewards()
         {
             //On peut ici augmenter le nombre d'utilisateurs pour tester les performances
-            _fixture.Initialize(100);
+            _fixture.Initialize(100000);
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -84,10 +85,15 @@ namespace TourGuideTest
 
             allUsers.ForEach(u => u.AddToVisitedLocations(new VisitedLocation(u.UserId, attraction, DateTime.Now)));
 
-            foreach (var user in allUsers)
+            //            foreach (var user in allUsers)
+            //          {
+            //            await _fixture.RewardsService.CalculateRewards(user, attractions);
+            //      }
+            var options = new ParallelOptions { MaxDegreeOfParallelism = 1000 };
+            await Parallel.ForEachAsync(allUsers, options, async (user, _) =>
             {
                 await _fixture.RewardsService.CalculateRewards(user, attractions);
-            }
+            });
 
             foreach (var user in allUsers)
             {
