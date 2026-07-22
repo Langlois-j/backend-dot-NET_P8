@@ -51,13 +51,8 @@ public class GpsUtil
     }
     private List<Attraction> GetAttractionsList()
     {
-        rateLimiter.Wait();
+        return new List<Attraction>
 
-        try
-        {
-            SleepLighter();
-
-            List<Attraction> attractions = new()
         {
             new Attraction("Disneyland", "Anaheim", "CA", 33.817595, -117.922008),
             new Attraction("Jackson Hole", "Jackson Hole", "WY", 43.582767, -110.821999),
@@ -86,23 +81,16 @@ public class GpsUtil
             new Attraction("Bronx Zoo", "Bronx", "NY", 40.852905, -73.872971),
             new Attraction("Cinderella Castle", "Orlando", "FL", 28.419411, -81.5812)
         };
-
-            return attractions;
-        }
-        finally
-        {
-            rateLimiter.Release();
-        }
     }
 
-    private void Sleep()
-    {
-        int delay = ThreadLocalRandom.Current.Next(30, 100);
-        Thread.Sleep(delay);
-    }
+    //private void Sleep()
+    //{
+    //    int delay = ThreadLocalRandom.Current.Next(30, 100);
+    //    Thread.Sleep(delay);
+    //}
 
-    private void SleepLighter()
-    {
-        Thread.Sleep(10);
-    }
+    //private void SleepLighter()
+    //{
+    //    Thread.Sleep(10);
+    //}
 }

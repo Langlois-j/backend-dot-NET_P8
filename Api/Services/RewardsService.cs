@@ -38,7 +38,7 @@ public class RewardsService : IRewardsService
 
     public async Task  CalculateRewards(User user)
     {
-        CalculateRewards(user, await _gpsUtil.GetAttractions());
+       await  CalculateRewards(user, await _gpsUtil.GetAttractions());
     }
 
     public async Task CalculateRewards(User user, List<Attraction> attractions)
@@ -69,10 +69,9 @@ public class RewardsService : IRewardsService
         return GetDistance(attraction, visitedLocation.Location) <= _proximityBuffer;
     }
 
-    private Task <int> GetRewardPoints(Attraction attraction, User user)
+    private Task<int> GetRewardPoints(Attraction attraction, User user)
     {
-
-        return await _rewardsCentral.GetAttractionRewardPoints(attraction.AttractionId, user.UserId);
+        return _rewardsCentral.GetAttractionRewardPoints(attraction.AttractionId, user.UserId);
     }
 
     public double GetDistance(Locations loc1, Locations loc2)

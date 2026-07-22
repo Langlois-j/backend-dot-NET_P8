@@ -19,37 +19,39 @@ public class RewardServiceTest : IClassFixture<DependencyFixture>
     }
 
     [Fact]
-    public void UserGetRewards()
+    public async Task UserGetRewards()
     {
         _fixture.Initialize(0);
         var user = new User(Guid.NewGuid(), "jon", "000", "jon@tourGuide.com");
-        var attraction = _fixture.GpsUtil.GetAttractions().First();
+        var allAttractions = await _fixture.GpsUtil.GetAttractions();
+        var attraction = allAttractions.First();
         user.AddToVisitedLocations(new VisitedLocation(user.UserId, attraction, DateTime.Now));
-        _fixture.TourGuideService.TrackUserLocation(user);
+        await _fixture.TourGuideService.TrackUserLocation(user);
         var userRewards = user.UserRewards;
         _fixture.TourGuideService.Tracker.StopTracking();
         Assert.True(userRewards.Count == 1);
     }
 
     [Fact]
-    public void IsWithinAttractionProximity()
+    public async Task IsWithinAttractionProximity()
     {
-        var attraction = _fixture.GpsUtil.GetAttractions().First();
+        var allAttractions = await _fixture.GpsUtil.GetAttractions();
+        var attraction = allAttractions.First();
         Assert.True(_fixture.RewardsService.IsWithinAttractionProximity(attraction, attraction));
     }
     [Fact]
     //[Fact(Skip = ("Needs fixed - can throw InvalidOperationException"))]
-    public void NearAllAttractions()
+    public async Task NearAllAttractions()
     {
         _fixture.Initialize(1);
+        _fixture.TourGuideService.Tracker.StopTracking(); 
         _fixture.RewardsService.SetProximityBuffer(int.MaxValue);
 
         var user = _fixture.TourGuideService.GetAllUsers().First();
-        _fixture.RewardsService.CalculateRewards(user);
+        await _fixture.RewardsService.CalculateRewards(user);
         var userRewards = _fixture.TourGuideService.GetUserRewards(user);
-        _fixture.TourGuideService.Tracker.StopTracking();
 
-        Assert.Equal(_fixture.GpsUtil.GetAttractions().Count, userRewards.Count);
+        var allAttractions = await _fixture.GpsUtil.GetAttractions();
+        Assert.Equal(allAttractions.Count, userRewards.Count);
     }
-
 }

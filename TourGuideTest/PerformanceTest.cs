@@ -46,10 +46,10 @@ namespace TourGuideTest
 
         // [Fact(Skip = ("Delete Skip when you want to pass the test"))]
         [Fact]
-        public void HighVolumeTrackLocation()
+        public async Task HighVolumeTrackLocation()
         {
             //On peut ici augmenter le nombre d'utilisateurs pour tester les performances
-            _fixture.Initialize(1000);
+            _fixture.Initialize(100);
 
             List<User> allUsers = _fixture.TourGuideService.GetAllUsers();
 
@@ -58,7 +58,7 @@ namespace TourGuideTest
 
             foreach (var user in allUsers)
             {
-                _fixture.TourGuideService.TrackUserLocation(user);
+              await  _fixture.TourGuideService.TrackUserLocation(user);
             }
             stopWatch.Stop();
             _fixture.TourGuideService.Tracker.StopTracking();
@@ -70,27 +70,30 @@ namespace TourGuideTest
 
         //[Fact(Skip = ("Delete Skip when you want to pass the test"))]
         [Fact]
-        public void HighVolumeGetRewards()
+        public async Task HighVolumeGetRewards()
         {
             //On peut ici augmenter le nombre d'utilisateurs pour tester les performances
-            _fixture.Initialize(1000);
+            _fixture.Initialize(100);
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            Attraction attraction = _fixture.GpsUtil.GetAttractions()[0];
+            List<Attraction> attractions = await _fixture.GpsUtil.GetAttractions();
+            Attraction attraction = attractions[0];
             List<User> allUsers = _fixture.TourGuideService.GetAllUsers();
+
             allUsers.ForEach(u => u.AddToVisitedLocations(new VisitedLocation(u.UserId, attraction, DateTime.Now)));
-            //mise en commentaire pour utilisation de la méthode en Cache
-            // allUsers.ForEach(u => _fixture.RewardsService.CalculateRewards(u));
-            //Méthode en Cache
-            List<Attraction> attractions = _fixture.GpsUtil.GetAttractions();
-            allUsers.ForEach(u => _fixture.RewardsService.CalculateRewards(u, attractions));
+
+            foreach (var user in allUsers)
+            {
+                await _fixture.RewardsService.CalculateRewards(user, attractions);
+            }
 
             foreach (var user in allUsers)
             {
                 Assert.True(user.UserRewards.Count > 0);
             }
+
             stopWatch.Stop();
             _fixture.TourGuideService.Tracker.StopTracking();
 

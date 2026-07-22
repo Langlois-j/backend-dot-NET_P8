@@ -1,4 +1,5 @@
-﻿using GpsUtil.Location;
+﻿using GpsUtil;
+using GpsUtil.Location;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Globalization;
@@ -16,7 +17,7 @@ public class TourGuideService : ITourGuideService
     private readonly IGpsUtil _gpsUtil;
     private readonly IRewardsService _rewardsService;
     private readonly TripPricer.TripPricer _tripPricer;
-    private readonly List<Attraction> _cachedAttractions;
+ 
 
     public Tracker Tracker { get; private set; }
     private readonly Dictionary<string, User> _internalUserMap = new();
@@ -29,8 +30,8 @@ public class TourGuideService : ITourGuideService
         _tripPricer = new();
         _gpsUtil = gpsUtil;
         _rewardsService = rewardsService;
-        _cachedAttractions =  _gpsUtil.GetAttractions();
-
+        
+   
         CultureInfo.CurrentCulture = new CultureInfo("en-US");
 
         if (_testMode)
@@ -91,19 +92,20 @@ public class TourGuideService : ITourGuideService
     {
         VisitedLocation visitedLocation = await _gpsUtil.GetUserLocation(user.UserId);
         user.AddToVisitedLocations(visitedLocation);
-         await _rewardsService.CalculateRewards(user, _cachedAttractions);
+         await _rewardsService.CalculateRewards(user);
         return visitedLocation;
     }
 
-    public List<Attraction> GetNearByAttractions(VisitedLocation visitedLocation)
+    public async Task<List<Attraction>> GetNearByAttractions(VisitedLocation visitedLocation)
     {
-        return _cachedAttractions
+        var attractions = await _gpsUtil.GetAttractions();
+        return attractions
             .OrderBy(a => _rewardsService.GetDistance(a, visitedLocation.Location))
             .Take(5)
             .ToList();
     }
-     
-  
+
+
 
     private void AddShutDownHook()
     {
