@@ -40,23 +40,24 @@ public class RewardsService : IRewardsService
     {
        await  CalculateRewards(user, await _gpsUtil.GetAttractions());
     }
-
     public async Task CalculateRewards(User user, List<Attraction> attractions)
     {
-        foreach (var visitedLocation in user.VisitedLocations)
-        {
-            foreach (var attraction in attractions)
+        var tasks = attractions
+            .Select(async attraction =>
             {
-                if (NearAttraction(visitedLocation, attraction))
+                foreach (var visitedLocation in user.VisitedLocations)
                 {
-                    user.AddUserReward(new UserReward(
-                        visitedLocation,
-                        attraction,
-                        await GetRewardPoints(attraction, user)
-                    ));
+                    if (NearAttraction(visitedLocation, attraction))
+                    {
+                        int points = await GetRewardPoints(attraction, user);
+                        user.AddUserReward(new UserReward(visitedLocation, attraction, points));
+                        break;
+                    }
                 }
-            }
-        }
+            })
+            .ToList();
+
+        await Task.WhenAll(tasks);
     }
     public bool IsWithinAttractionProximity(Attraction attraction, Locations location)
     {
