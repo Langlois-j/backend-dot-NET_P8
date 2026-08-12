@@ -20,8 +20,9 @@ public class TourGuideController : ControllerBase
     [HttpGet("getLocation")]
     public async Task<ActionResult<VisitedLocation>> GetLocation([FromQuery] string userName)
     {
-        var location = await _tourGuideService.GetUserLocation(GetUser(userName));
-        return Ok(location);
+        var user = GetUser(userName);
+        if (user == null) return NotFound($"User {userName} not found");
+        return Ok(await _tourGuideService.GetUserLocation(user));
     }
 
     // TODO: Change this method to no longer return a List of Attractions.
@@ -36,23 +37,26 @@ public class TourGuideController : ControllerBase
     [HttpGet("getNearbyAttractions")]
     public async Task<ActionResult<List<Attraction>>> GetNearbyAttractions([FromQuery] string userName)
     {
-        var visitedLocation = await _tourGuideService.GetUserLocation(GetUser(userName));
-        var attractions = await _tourGuideService.GetNearByAttractions(visitedLocation);
-        return Ok(attractions);
+        var user = GetUser(userName);
+        if (user == null) return NotFound($"User {userName} not found");
+        var visitedLocation = await _tourGuideService.GetUserLocation(user);
+        return Ok(await _tourGuideService.GetNearByAttractions(visitedLocation));
     }
 
     [HttpGet("getRewards")]
     public ActionResult<List<UserReward>> GetRewards([FromQuery] string userName)
     {
-        var rewards = _tourGuideService.GetUserRewards(GetUser(userName));
-        return Ok(rewards);
+        var user = GetUser(userName);
+        if (user == null) return NotFound($"User {userName} not found");
+        return Ok(_tourGuideService.GetUserRewards(user));
     }
 
     [HttpGet("getTripDeals")]
     public ActionResult<List<Provider>> GetTripDeals([FromQuery] string userName)
     {
-        var deals = _tourGuideService.GetTripDeals(GetUser(userName));
-        return Ok(deals);
+        var user = GetUser(userName);
+        if (user == null) return NotFound($"User {userName} not found");
+        return Ok(_tourGuideService.GetTripDeals(user));
     }
 
     private User? GetUser(string userName)
