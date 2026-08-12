@@ -14,7 +14,7 @@ public class RewardsService : IRewardsService
     private readonly int _attractionProximityRange = 200;
     private readonly IGpsUtil _gpsUtil;
     private readonly IRewardCentral _rewardsCentral;
-    private static int count = 0;
+    //private static int count = 0;
     //cache pour optimisation calcul
     private readonly ConcurrentDictionary<(double lat1, double lon1, double lat2, double lon2), double> _distanceCache
     = new();

@@ -55,7 +55,7 @@ public class TourGuideController : ControllerBase
         return Ok(deals);
     }
 
-    private User GetUser(string userName)
+    private User? GetUser(string userName)
     {
         return _tourGuideService.GetUser(userName);
     }
