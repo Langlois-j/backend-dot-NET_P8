@@ -11,27 +11,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: "TourGuide | Checkout code"
         uses: actions/checkout@v4
 
-      - name: Setup .NET 8
+      - name: "TourGuide | Setup .NET 8"
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      - name: Restore dependencies
+      - name: "TourGuide | Restore dependencies"
         run: dotnet restore
 
-      - name: Build
+      - name: "TourGuide | Build"
         run: dotnet build --no-restore --configuration Release -p:TreatWarningsAsErrors=false
 
-      - name: Test
+      - name: "TourGuide | Tests Unitaires"
         run: dotnet test --no-build --configuration Release --filter "FullyQualifiedName!~PerformanceTest"
 
-      - name: Publish
+      - name: "TourGuide | Publish"
         run: dotnet publish ./Api/TourGuide.csproj --no-build --configuration Release --output ./publish
 
-      - name: Upload artifact
+      - name: "TourGuide | Upload artifact"
         uses: actions/upload-artifact@v4
         with:
           name: tourguide-app
