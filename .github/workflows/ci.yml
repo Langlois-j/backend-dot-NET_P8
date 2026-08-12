@@ -2,9 +2,9 @@ name: CI TourGuide
 
 on:
   push:
-    branches: [ dev, main ]
+    branches: [ '**' ]
   pull_request:
-    branches: [ dev, main ]
+    branches: [ '**' ]
 
 jobs:
   build-and-test:
