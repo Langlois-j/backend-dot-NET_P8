@@ -38,10 +38,13 @@ jobs:
           name: tourguide-app
           path: ./publish
 
-  performance-tests:
-    name: "[CI] Tests de Performance"
+  performance-track-location:
+    name: "[CI] TrackLocation - ${{ matrix.users }} users"
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    strategy:
+      matrix:
+        users: [100, 1000, 5000, 10000, 50000, 100000]
 
     steps:
       - name: "TourGuide | Checkout code"
@@ -58,5 +61,35 @@ jobs:
       - name: "TourGuide | Build"
         run: dotnet build --no-restore --configuration Release -p:TreatWarningsAsErrors=false
 
-      - name: "TourGuide | Tests Performance"
-        run: dotnet test --no-build --configuration Release --filter "FullyQualifiedName~PerformanceTest" --logger "console;verbosity=detailed"
+      - name: "TourGuide | TrackLocation ${{ matrix.users }} users"
+        run: dotnet test --no-build --configuration Release --filter "FullyQualifiedName~HighVolumeTrackLocation" --logger "console;verbosity=detailed"
+        env:
+          PERF_USER_COUNT: ${{ matrix.users }}
+
+  performance-get-rewards:
+    name: "[CI] GetRewards - ${{ matrix.users }} users"
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      matrix:
+        users: [100, 1000, 10000, 100000]
+
+    steps:
+      - name: "TourGuide | Checkout code"
+        uses: actions/checkout@v4
+
+      - name: "TourGuide | Setup .NET 8"
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: "TourGuide | Restore dependencies"
+        run: dotnet restore
+
+      - name: "TourGuide | Build"
+        run: dotnet build --no-restore --configuration Release -p:TreatWarningsAsErrors=false
+
+      - name: "TourGuide | GetRewards ${{ matrix.users }} users"
+        run: dotnet test --no-build --configuration Release --filter "FullyQualifiedName~HighVolumeGetRewards" --logger "console;verbosity=detailed"
+        env:
+          PERF_USER_COUNT: ${{ matrix.users }}

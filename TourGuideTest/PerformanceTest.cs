@@ -49,7 +49,10 @@ namespace TourGuideTest
         public async Task HighVolumeTrackLocation()
         {
             //On peut ici augmenter le nombre d'utilisateurs pour tester les performances
-            _fixture.Initialize(100000);
+            // _fixture.Initialize(100000);
+            //mise en place pour test CI
+            int userCount = int.Parse(Environment.GetEnvironmentVariable("PERF_USER_COUNT") ?? "1000");
+            _fixture.Initialize(userCount);
 
             List<User> allUsers = _fixture.TourGuideService.GetAllUsers();
 
@@ -74,7 +77,10 @@ namespace TourGuideTest
         public async Task HighVolumeGetRewards()
         {
             //On peut ici augmenter le nombre d'utilisateurs pour tester les performances
-            _fixture.Initialize(100000);
+            //_fixture.Initialize(100000);
+            //mise en place pour test CI
+            int userCount = int.Parse(Environment.GetEnvironmentVariable("PERF_USER_COUNT") ?? "1000");
+            _fixture.Initialize(userCount);
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
