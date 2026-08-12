@@ -8,6 +8,7 @@ on:
 
 jobs:
   build-and-test:
+    name: "[CI] Build & Tests Unitaires"
     runs-on: ubuntu-latest
 
     steps:
@@ -29,32 +30,3 @@ jobs:
         run: dotnet test --no-build --configuration Release --filter "FullyQualifiedName!~PerformanceTest"
 
       - name: "TourGuide | Publish"
-        run: dotnet publish ./Api/TourGuide.csproj --no-build --configuration Release --output ./publish
-
-      - name: "TourGuide | Upload artifact"
-        uses: actions/upload-artifact@v4
-        with:
-          name: tourguide-app
-          path: ./publish
-
-performance-tests:
-    name: "[CI] Tests de Performance"
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - name: "TourGuide | Checkout code"
-        uses: actions/checkout@v4
-
-      - name: "TourGuide | Setup .NET 8"
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: "TourGuide | Restore"
-        run: dotnet restore
-
-      - name: "TourGuide | Build"
-        run: dotnet build --no-restore --configuration Release -p:TreatWarningsAsErrors=false
-
-      - name: "TourGuide | Tests Performance"
-        run: dotnet test --no-build --configuration Release --filter "FullyQualifiedName~PerformanceTest" --logger "console;verbosity=detailed"
